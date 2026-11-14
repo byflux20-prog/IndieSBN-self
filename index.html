@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IndieSBN - Official Alternative Registry System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+    
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+    }
+    .font-mono-code {
+      font-family: 'Space Mono', monospace;
+    }
+    .official-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 0.5rem;
+    }
+    .official-card-light {
+      background: #ffffff;
+      color: #000000;
+      border: 1px solid #cbd5e1;
+    }
+    .page-section {
+      display: none;
+    }
+    .page-section.active {
+      display: block;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between antialiased">
+
+  <!-- NAVBAR RESMI -->
+  <nav class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center space-x-2.5 cursor-pointer" onclick="showView('homeView')">
+        <div class="w-8 h-8 rounded bg-blue-600 flex items-center justify-center font-bold text-white text-sm">
+          iS
+        </div>
+        <div>
+          <span class="font-bold text-lg tracking-tight text-white">IndieSBN</span>
+          <span class="block text-[9px] text-slate-400 uppercase tracking-wider">Registry System</span>
+        </div>
+      </div>
+
+      <div id="authStatusArea" class="flex items-center space-x-2">
+        <button onclick="openLoginModal()" class="px-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium transition-colors">
+          Masuk
+        </button>
+        <button onclick="openRegisterAccountModal()" class="px-3.5 py-1.5 rounded bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium transition-colors">
+          Daftar Akun
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- KONTROL UTAMA HALAMAN -->
+  <main class="max-w-4xl mx-auto px-4 py-6 flex-grow w-full">
+
+    <!-- DISCLAIMER FORMAL -->
+    <div class="mb-6 p-3 rounded official-card border-amber-500/30 bg-amber-500/5 flex items-start space-x-3 text-amber-200 text-xs">
+      <i class="fas fa-info-circle text-amber-400 mt-0.5 text-sm flex-shrink-0"></i>
+      <div>
+        <strong class="font-semibold text-amber-300">Pemberitahuan Sistem:</strong> IndieSBN adalah platform pencatatan mandiri independen untuk keperluan arsip karya kreatif, fiksi, dan hiburan. Bukan nomor ISBN resmi dari lembaga pemerintah.
+      </div>
+    </div>
+
+    <!-- 1. HALAMAN UTAMA (HOME) -->
+    <section id="homeView" class="page-section active space-y-6">
+      <div class="text-center py-6 space-y-2">
+        <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-white">
+          Sistem Registrasi Serial Buku Alternatif
+        </h1>
+        <p class="text-slate-400 text-xs md:text-sm max-w-lg mx-auto">
+          Kelola, daftarkan, dan verifikasi nomor unik 13 digit serial buku secara instan dan permanen.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div onclick="goToRegisterOrDashboard()" class="official-card p-5 hover:border-blue-500 transition-all cursor-pointer group flex flex-col justify-between space-y-4">
+          <div class="space-y-2">
+            <div class="w-10 h-10 rounded bg-blue-600/20 text-blue-400 flex items-center justify-center text-base">
+              <i class="fas fa-book-medical"></i>
+            </div>
+            <h2 class="text-base font-bold text-white">Daftarkan IndieSBN</h2>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Buat nomor registrasi baru lengkap dengan barcode standar dan sertifikat digital resmi untuk karya Anda.
+            </p>
+          </div>
+          <div class="flex items-center text-xs font-semibold text-blue-400 space-x-1">
+            <span>Akses Pendaftaran</span>
+            <i class="fas fa-arrow-right text-[10px]"></i>
+          </div>
+        </div>
+
+        <div onclick="showView('searchView')" class="official-card p-5 hover:border-blue-500 transition-all cursor-pointer group flex flex-col justify-between space-y-4">
+          <div class="space-y-2">
+            <div class="w-10 h-10 rounded bg-slate-700 text-slate-300 flex items-center justify-center text-base">
+              <i class="fas fa-search"></i>
+            </div>
+            <h2 class="text-base font-bold text-white">Cek / Cari IndieSBN</h2>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Verifikasi keaslian nomor buku terdaftar di database publik menggunakan 13 digit kode unik.
+            </p>
+          </div>
+          <div class="flex items-center text-xs font-semibold text-blue-400 space-x-1">
+            <span>Cari Nomor Buku</span>
+            <i class="fas fa-arrow-right text-[10px]"></i>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. HALAMAN CEK BUKU (SEARCH) -->
+    <section id="searchView" class="page-section max-w-xl mx-auto space-y-4">
+      <div class="flex items-center space-x-3 mb-2">
+        <button onclick="showView('homeView')" class="px-3 py-1.5 rounded official-card text-xs text-slate-300 hover:text-white flex items-center space-x-1">
+          <i class="fas fa-arrow-left"></i>
+          <span>Kembali</span>
+        </button>
+        <h2 class="text-base font-bold text-white">Verifikasi Data Buku</h2>
+      </div>
+
+      <div class="official-card p-4 space-y-3">
+        <label class="block text-xs font-medium text-slate-300">Masukkan 13 Digit Nomor IndieSBN</label>
+        <div class="flex space-x-2">
+          <input type="text" id="searchInput" placeholder="Contoh: 978-82-9012-345-6" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono-code">
+          <button onclick="searchBook()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold flex items-center space-x-1.5 flex-shrink-0">
+            <i class="fas fa-search"></i>
+            <span>Cek</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="searchResultArea" class="hidden"></div>
+    </section>
+
+    <!-- 3. HALAMAN DASHBOARD PENERBIT -->
+    <section id="dashboardView" class="page-section space-y-4">
+      <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 border-b border-slate-800 pb-3">
+        <div>
+          <h2 class="text-base font-bold text-white">Dashboard Penerbit</h2>
+          <p id="userGreeting" class="text-xs text-slate-400"></p>
+        </div>
+        <button onclick="openRegisterModal()" class="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-semibold text-xs flex items-center justify-center space-x-2">
+          <i class="fas fa-plus"></i>
+          <span>Daftarkan Buku Baru</span>
+        </button>
+      </div>
+
+      <div class="official-card p-3.5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+        <div class="flex items-center space-x-3">
+          <div class="w-8 h-8 rounded bg-slate-800 text-slate-300 flex items-center justify-center text-sm">
+            <i class="fas fa-building"></i>
+          </div>
+          <div>
+            <span class="block text-[9px] uppercase tracking-wider text-slate-400 font-semibold">Penerbit Aktif</span>
+            <span id="publisherDisplayName" class="font-bold text-xs text-white">-</span>
+          </div>
+        </div>
+        <span class="text-[11px] text-emerald-400 font-medium bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+          <i class="fas fa-shield-alt mr-1"></i>Akun Mandiri Aktif
+        </span>
+      </div>
+
+      <div class="space-y-3 pt-2">
+        <div class="flex justify-between items-center">
+          <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Histori Koleksi Buku</h3>
+          <span id="bookCountBadge" class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono-code">0 Buku</span>
+        </div>
+        <div id="myBooksList" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <!-- Render Buku -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL DAFTAR AKUN BARU -->
+  <div id="registerAccountModal" class="fixed inset-0 z-50 bg-slate-950/80 flex items-center justify-center p-4 hidden">
+    <div class="official-card max-w-sm w-full rounded-lg overflow-hidden shadow-2xl">
+      <div class="p-3.5 border-b border-slate-800 flex justify-between items-center bg-slate-900">
+        <h3 class="font-bold text-xs text-white"><i class="fas fa-user-plus text-blue-400 mr-1.5"></i>Daftar Akun Penerbit</h3>
+        <button onclick="closeRegisterAccountModal()" class="text-slate-400 hover:text-white text-xs"><i class="fas fa-times"></i></button>
+      </div>
+      <form onsubmit="handleRegisterAccount(event)" class="p-4 space-y-3 text-xs">
+        <div>
+          <label class="block font-medium text-slate-300 mb-1">Nama Pemilik / Penulis *</label>
+          <input type="text" id="regOwnerName" required placeholder="Nama Anda" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+        </div>
+        <div>
+          <label class="block font-medium text-slate-300 mb-1">Nama Penerbit *</label>
+          <input type="text" id="regPublisherName" required placeholder="Contoh: Fathi Press Indie" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+        </div>
+        <div>
+          <label class="block font-medium text-slate-300 mb-1">Kata Sandi (Password) *</label>
+          <input type="password" id="regPassword" required placeholder="Minimal 6 karakter" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+        </div>
+        <button type="submit" class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded text-xs">Buat Akun</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL LOGIN / MASUK -->
+  <div id="loginModal" class="fixed inset-0 z-50 bg-slate-950/80 flex items-center justify-center p-4 hidden">
+    <div class="official-card max-w-sm w-full rounded-lg overflow-hidden shadow-2xl">
+      <div class="p-3.5 border-b border-slate-800 flex justify-between items-center bg-slate-900">
+        <h3 class="font-bold text-xs text-white"><i class="fas fa-sign-in-alt text-blue-400 mr-1.5"></i>Masuk ke Akun Penerbit</h3>
+        <button onclick="closeLoginModal()" class="text-slate-400 hover:text-white text-xs"><i class="fas fa-times"></i></button>
+      </div>
+      <form onsubmit="handleLoginAccount(event)" class="p-4 space-y-3 text-xs">
+        <div>
+          <label class="block font-medium text-slate-300 mb-1">Nama Penerbit *</label>
+          <input type="text" id="loginPublisherName" required placeholder="Nama penerbit terdaftar" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+        </div>
+        <div>
+          <label class="block font-medium text-slate-300 mb-1">Kata Sandi (Password) *</label>
+          <input type="password" id="loginPassword" required placeholder="Password Anda" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+        </div>
+        <button type="submit" class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded text-xs">Masuk Sekarang</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL FORM PENDAFTARAN BUKU -->
+  <div id="registerModal" class="fixed inset-0 z-50 bg-slate-950/80 flex items-center justify-center p-4 hidden">
+    <div class="official-card max-w-md w-full rounded-lg overflow-hidden shadow-2xl max-h-[90vh] flex flex-col">
+      <div class="p-3.5 border-b border-slate-800 flex justify-between items-center bg-slate-900">
+        <h3 class="font-bold text-xs text-white flex items-center space-x-2">
+          <i class="fas fa-book text-blue-400"></i>
+          <span>Formulir Pendaftaran Buku</span>
+        </h3>
+        <button onclick="closeRegisterModal()" class="text-slate-400 hover:text-white text-xs">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <form id="bookForm" onsubmit="handleBookSubmit(event)" class="p-4 space-y-3 overflow-y-auto flex-grow text-xs">
+        <div>
+          <label class="block font-medium text-slate-300 mb-1">Judul Buku *</label>
+          <input type="text" id="bookTitle" required placeholder="Contoh: Petualangan Nusantara" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-medium text-slate-300 mb-1">Nama Penulis *</label>
+            <input type="text" id="bookAuthor" required placeholder="Nama / Nama Pena" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+          </div>
+          <div>
+            <label class="block font-medium text-slate-300 mb-1">Penerbit (Otomatis)</label>
+            <input type="text" id="bookPublisherReadOnly" readonly class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-slate-400 cursor-not-allowed font-semibold">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-medium text-slate-300 mb-1">Jumlah Halaman *</label>
+            <input type="number" id="bookPages" required min="1" placeholder="150" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+          </div>
+          <div>
+            <label class="block font-medium text-slate-300 mb-1">Tahun Terbit</label>
+            <input type="text" id="bookYear" readonly class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-slate-400 cursor-not-allowed">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-medium text-slate-300 mb-1">Kategori *</label>
+            <select id="bookCategory" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+              <option value="Fiksi">Fiksi</option>
+              <option value="Non-Fiksi">Non-Fiksi</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-medium text-slate-300 mb-1">Format *</label>
+            <select id="bookFormat" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+              <option value="Digital (E-Book)">Digital (E-Book)</option>
+              <option value="Cetak Fisik">Cetak Fisik</option>
+              <option value="Cetak & Digital">Cetak & Digital</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-medium text-slate-300 mb-1">URL Cover Buku (Opsional)</label>
+          <input type="url" id="bookCoverUrl" placeholder="https://example.com/cover.jpg" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+        </div>
+
+        <div class="pt-2">
+          <button type="submit" class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded text-xs flex items-center justify-center space-x-2">
+            <i class="fas fa-paper-plane"></i>
+            <span>Daftarkan Buku</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL LOADING (5-15s) -->
+  <div id="loadingModal" class="fixed inset-0 z-50 bg-slate-950/90 flex items-center justify-center p-4 hidden">
+    <div class="text-center space-y-3 max-w-xs">
+      <div class="relative w-12 h-12 mx-auto flex items-center justify-center">
+        <div class="absolute inset-0 rounded-full border-2 border-slate-700 border-t-blue-500 animate-spin"></div>
+        <i class="fas fa-barcode text-blue-400 text-sm"></i>
+      </div>
+      <div>
+        <h4 class="font-bold text-white text-xs">Memproses Nomor IndieSBN...</h4>
+        <p id="loadingCountdownText" class="text-[11px] text-slate-400 mt-1">Menyelaraskan data ke database...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL SERTIFIKAT & BARCODE -->
+  <div id="certificateModal" class="fixed inset-0 z-50 bg-slate-950/90 flex items-center justify-center p-4 hidden overflow-y-auto">
+    <div class="max-w-sm w-full space-y-3 my-auto">
+      <div class="flex justify-end">
+        <button onclick="closeCertificateModal()" class="w-7 h-7 rounded bg-slate-800 text-slate-300 hover:text-white flex items-center justify-center text-xs">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div id="certificateCard" class="official-card-light rounded-lg p-4 space-y-3 shadow-xl border-2 border-slate-400">
+        <div class="flex justify-between items-start border-b pb-2 border-slate-200">
+          <div>
+            <span class="text-[9px] font-bold uppercase tracking-widest text-blue-700 block">Sertifikat Resmi</span>
+            <h3 class="font-extrabold text-base tracking-tight">IndieSBN</h3>
+          </div>
+          <div class="text-right">
+            <span class="text-[8px] text-slate-500 block">Status</span>
+            <span class="text-[9px] font-bold bg-green-100 text-green-800 px-1.5 py-0.5 rounded">TERDAFTAR</span>
+          </div>
+        </div>
+
+        <div class="flex space-x-3 items-center">
+          <img id="certBookCover" src="" class="w-14 h-20 object-cover rounded border border-slate-300 flex-shrink-0 bg-slate-100" alt="Cover">
+          <div class="space-y-0.5 text-xs overflow-hidden text-slate-800">
+            <h4 id="certBookTitle" class="font-bold truncate"></h4>
+            <p class="text-[11px] text-slate-600">Penulis: <span id="certBookAuthor" class="font-semibold text-slate-900"></span></p>
+            <p class="text-[11px] text-slate-600">Penerbit: <span id="certBookPublisher" class="font-semibold text-slate-900"></span></p>
+            <p class="text-[10px] text-slate-500"><span id="certBookCategory"></span> • <span id="certBookPages"></span> Hal.</p>
+          </div>
+        </div>
+
+        <div class="bg-slate-50 p-2.5 rounded text-center space-y-1 border border-slate-200">
+          <svg id="barcodeSvg" class="mx-auto max-w-full"></svg>
+          <div class="text-[9px] text-slate-500 font-mono-code pt-0.5">
+            ID: <span id="certRegId"></span>
+          </div>
+        </div>
+
+        <div class="text-[8px] text-center text-slate-500 pt-1 border-t border-slate-100">
+          Sistem Pencatatan Mandiri Alternatif • Terverifikasi di Cloud
+        </div>
+      </div>
+
+      <div class="text-center">
+        <p class="text-[11px] text-slate-400">💡 Silakan *screenshot* kartu di atas untuk disimpan.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-slate-800 py-3 mt-8 bg-slate-900">
+    <div class="max-w-4xl mx-auto px-4 text-center space-y-0.5">
+      <p class="text-xs text-slate-400">IndieSBN — Alternative Serial Book Number Registry</p>
+      <p class="text-[10px] text-slate-500">Platform arsip kreatif mandiri. Data tersimpan permanen di cloud.</p>
+    </div>
+  </footer>
+
+  <!-- SKRIP FIREBASE & APLIKASI -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, query, where, getDocs, setDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDVcutKf4s_DVZAvlLhmjQTfhNaUd4bMBI",
+      authDomain: "indiesbn.firebaseapp.com",
+      projectId: "indiesbn",
+      storageBucket: "indiesbn.firebasestorage.app",
+      messagingSenderId: "190180515868",
+      appId: "1:190180515868:web:0779c590940dd5ad3bbfd9",
+      measurementId: "G-T7G3QKW25T"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    window.currentUser = JSON.parse(localStorage.getItem('indiesbn_current_user')) || null;
+
+    // Inisialisasi Tampilan Navbar Berdasarkan Status Login
+    function updateNavbarAuth() {
+      const authArea = document.getElementById('authStatusArea');
+      if (window.currentUser) {
+        authArea.innerHTML = `
+          <div class="flex items-center space-x-2">
+            <span class="text-xs text-slate-300 font-semibold hidden sm:inline">${window.currentUser.publisherName}</span>
+            <button onclick="logoutAccount()" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition-colors">
+              <i class="fas fa-sign-out-alt"></i> Keluar
+            </button>
+          </div>
+        `;
+        document.getElementById('userGreeting').innerText = `Selamat datang, ${window.currentUser.ownerName}.`;
+        document.getElementById('publisherDisplayName').innerText = window.currentUser.publisherName;
+      } else {
+        authArea.innerHTML = `
+          <button onclick="openLoginModal()" class="px-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium transition-colors">
+            Masuk
+          </button>
+          <button onclick="openRegisterAccountModal()" class="px-3.5 py-1.5 rounded bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium transition-colors">
+            Daftar Akun
+          </button>
+        `;
+      }
+    }
+    updateNavbarAuth();
+
+    // Modal Kontrol
+    window.openRegisterAccountModal = () => document.getElementById('registerAccountModal').classList.remove('hidden');
+    window.closeRegisterAccountModal = () => document.getElementById('registerAccountModal').classList.add('hidden');
+    window.openLoginModal = () => document.getElementById('loginModal').classList.remove('hidden');
+    window.closeLoginModal = () => document.getElementById('loginModal').classList.add('hidden');
+
+    // Proses Daftar Akun Baru ke Firestore
+    window.handleRegisterAccount = async (e) => {
+      e.preventDefault();
+      const ownerName = document.getElementById('regOwnerName').value.trim();
+      const publisherName = document.getElementById('regPublisherName').value.trim();
+      const password = document.getElementById('regPassword').value;
+
+      try {
+        // Cek apakah nama penerbit sudah digunakan
+        const q = query(collection(db, "users"), where("publisherName", "==", publisherName));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          alert("Nama penerbit sudah terdaftar! Gunakan nama lain.");
+          return;
+        }
+
+        const userId = 'USER-' + Math.random().toString(36).substring(2, 9).toUpperCase();
+        const userData = { userId, ownerName, publisherName, password };
+
+        // Simpan ke Firestore
+        await setDoc(doc(db, "users", userId), userData);
+
+        window.currentUser = userData;
+        localStorage.setItem('indiesbn_current_user', JSON.stringify(userData));
+        
+        closeRegisterAccountModal();
+        updateNavbarAuth();
+        showView('dashboardView');
+        loadMyBooks();
+        alert("Akun berhasil dibuat!");
+      } catch (err) {
+        alert("Gagal mendaftar: " + err.message);
+      }
+    };
+
+    // Proses Login Akun
+    window.handleLoginAccount = async (e) => {
+      e.preventDefault();
+      const publisherName = document.getElementById('loginPublisherName').value.trim();
+      const password = document.getElementById('loginPassword').value;
+
+      try {
+        const q = query(collection(db, "users"), where("publisherName", "==", publisherName), where("password", "==", password));
+        const snap = await getDocs(q);
+
+        if (snap.empty) {
+          alert("Nama penerbit atau password salah!");
+          return;
+        }
+
+        const userData = snap.docs[0].data();
+        window.currentUser = userData;
+        localStorage.setItem('indiesbn_current_user', JSON.stringify(userData));
+
+        closeLoginModal();
+        updateNavbarAuth();
+        showView('dashboardView');
+        loadMyBooks();
+      } catch (err) {
+        alert("Gagal masuk: " + err.message);
+      }
+    };
+
+    window.logoutAccount = () => {
+      window.currentUser = null;
+      localStorage.removeItem('indiesbn_current_user');
+      updateNavbarAuth();
+      showView('homeView');
+    };
+
+    window.showView = (viewId) => {
+      document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
+      const target = document.getElementById(viewId);
+      if (target) target.classList.add('active');
+      window.scrollTo(0, 0);
+    };
+
+    window.goToRegisterOrDashboard = () => {
+      if (window.currentUser) {
+        showView('dashboardView');
+        loadMyBooks();
+      } else {
+        openLoginModal();
+      }
+    };
+
+    window.openRegisterModal = () => {
+      if (!window.currentUser) {
+        openLoginModal();
+        return;
+      }
+      document.getElementById('bookPublisherReadOnly').value = window.currentUser.publisherName;
+      document.getElementById('bookYear').value = new Date().getFullYear();
+      document.getElementById('registerModal').classList.remove('hidden');
+    };
+
+    window.closeRegisterModal = () => document.getElementById('registerModal').classList.add('hidden');
+
+    window.handleBookSubmit = async (e) => {
+      e.preventDefault();
+      closeRegisterModal();
+
+      const loadingModal = document.getElementById('loadingModal');
+      loadingModal.classList.remove('hidden');
+
+      const randomWaitTime = Math.floor(Math.random() * 11) + 5; 
+      let countdown = randomWaitTime;
+      
+      const countdownInterval = setInterval(() => {
+        countdown--;
+        if (countdown > 0) {
+          document.getElementById('loadingCountdownText').innerText = `Memproses keunikan kode... (${countdown}s)`;
+        } else {
+          clearInterval(countdownInterval);
+        }
+      }, 1000);
+
+      const indiesbnCode = await generateUniqueIndieSBN();
+      const randomRegId = 'ID-' + Math.random().toString(36).substring(2, 9).toUpperCase();
+
+      const bookData = {
+        title: document.getElementById('bookTitle').value,
+        author: document.getElementById('bookAuthor').value,
+        publisher: window.currentUser.publisherName,
+        pages: parseInt(document.getElementById('bookPages').value),
+        year: document.getElementById('bookYear').value,
+        category: document.getElementById('bookCategory').value,
+        format: document.getElementById('bookFormat').value,
+        coverUrl: document.getElementById('bookCoverUrl').value || 'https://via.placeholder.com/150x220/1e293b/cbd5e1?text=IndieSBN',
+        indiesbn: indiesbnCode,
+        regId: randomRegId,
+        userId: window.currentUser.userId,
+        createdAt: new Date().toISOString()
+      };
+
+      setTimeout(async () => {
+        try {
+          await addDoc(collection(db, "books"), bookData);
+          loadingModal.classList.add('hidden');
+          openCertificateModal(bookData);
+          loadMyBooks();
+          document.getElementById('bookForm').reset();
+        } catch (err) {
+          loadingModal.classList.add('hidden');
+          alert("Gagal menyimpan buku: " + err.message);
+        }
+      }, randomWaitTime * 1000);
+    };
+
+    async function generateUniqueIndieSBN() {
+      let isUnique = false;
+      let finalCode = "";
+      while (!isUnique) {
+        const part1 = Math.floor(1000 + Math.random() * 9000);
+        const part2 = Math.floor(100 + Math.random() * 900);
+        const part3 = Math.floor(0 + Math.random() * 10);
+        finalCode = `978-82-${part1}-${part2}-${part3}`;
+
+        const q = query(collection(db, "books"), where("indiesbn", "==", finalCode));
+        const snapshot = await getDocs(q);
+        if (snapshot.empty) isUnique = true;
+      }
+      return finalCode;
+    }
+
+    async function loadMyBooks() {
+      if (!window.currentUser) return;
+      const booksContainer = document.getElementById('myBooksList');
+      booksContainer.innerHTML = `<div class="col-span-2 text-center py-4 text-slate-500 text-xs">Memuat data...</div>`;
+
+      const q = query(collection(db, "books"), where("userId", "==", window.currentUser.userId));
+      const snapshot = await getDocs(q);
+
+      document.getElementById('bookCountBadge').innerText = `${snapshot.size} Buku`;
+
+      if (snapshot.empty) {
+        booksContainer.innerHTML = `
+          <div class="col-span-2 official-card p-5 text-center space-y-2">
+            <p class="text-xs text-slate-400">Belum ada buku yang terdaftar.</p>
+            <button onclick="openRegisterModal()" class="text-xs text-blue-400 font-bold hover:underline">Daftarkan Buku Pertama</button>
+          </div>
+        `;
+        return;
+      }
+
+      booksContainer.innerHTML = "";
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        const card = document.createElement('div');
+        card.className = "official-card p-3 flex items-center justify-between space-x-3";
+        card.innerHTML = `
+          <div class="flex items-center space-x-3 overflow-hidden">
+            <img src="${data.coverUrl}" class="w-10 h-14 object-cover rounded bg-slate-800 flex-shrink-0">
+            <div class="overflow-hidden text-xs">
+              <h4 class="font-bold text-white truncate">${data.title}</h4>
+              <p class="text-slate-400 text-[11px] truncate">Penulis: ${data.author}</p>
+              <p class="text-blue-400 font-mono-code text-[10px] pt-0.5">${data.indiesbn}</p>
+            </div>
+          </div>
+          <button onclick='viewBookDetails(${JSON.stringify(data)})' class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-xs text-blue-400 font-semibold flex-shrink-0">
+            Sertifikat
+          </button>
+        `;
+        booksContainer.appendChild(card);
+      });
+    }
+
+    window.viewBookDetails = (bookData) => openCertificateModal(bookData);
+
+    function openCertificateModal(bookData) {
+      document.getElementById('certBookCover').src = bookData.coverUrl;
+      document.getElementById('certBookTitle').innerText = bookData.title;
+      document.getElementById('certBookAuthor').innerText = bookData.author;
+      document.getElementById('certBookPublisher').innerText = bookData.publisher;
+      document.getElementById('certBookCategory').innerText = bookData.category;
+      document.getElementById('certBookPages').innerText = bookData.pages;
+      document.getElementById('certRegId').innerText = bookData.regId || 'REG-INDIE';
+
+      JsBarcode("#barcodeSvg", bookData.indiesbn, {
+        format: "CODE128",
+        lineColor: "#000000",
+        width: 1.5,
+        height: 40,
+        displayValue: true,
+        fontSize: 11,
+        fontOptions: "bold",
+        font: "Space Mono"
+      });
+
+      document.getElementById('certificateModal').classList.remove('hidden');
+    }
+
+    window.closeCertificateModal = () => document.getElementById('certificateModal').classList.add('hidden');
+
+    window.searchBook = async () => {
+      const input = document.getElementById('searchInput').value.trim();
+      const resultArea = document.getElementById('searchResultArea');
+      
+      if (!input) {
+        alert("Masukkan nomor IndieSBN terlebih dahulu!");
+        return;
+      }
+
+      resultArea.classList.remove('hidden');
+      resultArea.innerHTML = `<div class="text-center py-4 text-xs text-slate-400">Mencari nomor ${input}...</div>`;
+
+      const q = query(collection(db, "books"), where("indiesbn", "==", input));
+      const snapshot = await getDocs(q);
+
+      if (snapshot.empty) {
+        resultArea.innerHTML = `
+          <div class="official-card p-4 border-rose-500/30 bg-rose-500/5 text-center space-y-1">
+            <h4 class="font-bold text-xs text-rose-300">Data Tidak Ditemukan</h4>
+            <p class="text-[11px] text-slate-400">Nomor IndieSBN <span class="font-mono-code text-white">${input}</span> tidak terdaftar dalam sistem.</p>
+          </div>
+        `;
+      } else {
+        const book = snapshot.docs[0].data();
+        resultArea.innerHTML = `
+          <div class="official-card p-4 border-emerald-500/30 space-y-3">
+            <div class="flex items-center space-x-2 text-emerald-400 text-xs font-bold">
+              <i class="fas fa-check-circle"></i>
+              <span>STATUS: TERVERIFIKASI RESMI</span>
+            </div>
+            <div class="flex space-x-3 items-start">
+              <img src="${book.coverUrl}" class="w-16 h-22 object-cover rounded bg-slate-900 border border-slate-700 flex-shrink-0">
+              <div class="space-y-1 text-xs text-slate-300">
+                <h3 class="font-bold text-sm text-white">${book.title}</h3>
+                <p>Penulis: <span class="text-white">${book.author}</span></p>
+                <p>Penerbit: <span class="text-white">${book.publisher}</span></p>
+                <p class="text-slate-400">${book.category} • ${book.pages} Hal • ${book.format}</p>
+                <p class="text-blue-400 font-mono-code text-xs font-bold pt-1">${book.indiesbn}</p>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    };
+  </script>
+</body>
+</html>
